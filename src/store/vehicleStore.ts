@@ -158,26 +158,29 @@ export const useVehicleStore = create<VehicleState>((set, get) => ({
   },
 
   updateMonitorStatus: (status) => {
-    const { isBound } = get();
+    const { isBound, monitorStatus: prevMonitorStatus } = get();
     if (!isBound) {
       console.log('[VehicleStore] 未绑定车辆，忽略状态更新');
       return;
     }
 
+    const prevTemperature = prevMonitorStatus?.currentTemperature ?? status.currentTemperature;
+
     set({ monitorStatus: status });
     saveToStorage(STORAGE_KEYS.MONITOR_STATUS, status);
 
-    get().checkAndTriggerAlerts(status);
+    get().checkAndTriggerAlerts(status, prevTemperature);
 
     console.log('[VehicleStore] 监控状态更新', {
       powerStatus: status.powerStatus,
       temperature: status.currentTemperature,
+      prevTemperature,
       compressor: status.compressorStatus
     });
   },
 
-  checkAndTriggerAlerts: (status: MonitorStatus) => {
-    const { isBound, currentAlert, monitorStatus } = get();
+  checkAndTriggerAlerts: (status: MonitorStatus, prevTemperature?: number) => {
+    const { isBound, currentAlert } = get();
     if (!isBound) return;
 
     if (currentAlert && currentAlert.status === 'pending') {
@@ -185,7 +188,7 @@ export const useVehicleStore = create<VehicleState>((set, get) => ({
       return;
     }
 
-    const prevTemp = monitorStatus?.currentTemperature ?? status.currentTemperature;
+    const prevTemp = prevTemperature ?? status.currentTemperature;
     const tempRise = status.currentTemperature - prevTemp;
     const tempFromTarget = status.currentTemperature - status.targetTemperature;
 
