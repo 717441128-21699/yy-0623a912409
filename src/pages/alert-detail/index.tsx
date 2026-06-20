@@ -8,6 +8,7 @@ import styles from './index.module.scss';
 import { useVehicleStore } from '@/store/vehicleStore';
 import { mockAlerts, mockFeedbacks } from '@/data/mockData';
 import { STEP_GUIDANCE } from '@/types';
+import { getPhotoPath } from '@/utils/photo';
 import type { AlertRecord, FeedbackRecord } from '@/types';
 
 const AlertDetailPage: React.FC = () => {
@@ -71,9 +72,11 @@ const AlertDetailPage: React.FC = () => {
 
   const handlePreviewImage = (url: string, urls: string[]) => {
     console.log('[AlertDetailPage] 预览图片', url);
+    const permanentUrl = getPhotoPath(url);
+    const permanentUrls = urls.map(u => getPhotoPath(u));
     Taro.previewImage({
-      current: url,
-      urls
+      current: permanentUrl,
+      urls: permanentUrls
     });
   };
 
@@ -210,7 +213,7 @@ const AlertDetailPage: React.FC = () => {
                       >
                         <Image
                           className={styles.photoImg}
-                          src={photo}
+                          src={getPhotoPath(photo)}
                           mode="aspectFill"
                           lazyLoad
                         />

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Image } from '@tarojs/components';
 import dayjs from 'dayjs';
 import styles from './index.module.scss';
+import { getPhotoPath } from '@/utils/photo';
 import type { FeedbackRecord, AlertRecord } from '@/types';
 
 interface RecordItemProps {
@@ -33,7 +34,7 @@ const RecordItem: React.FC<RecordItemProps> = ({ alert, feedback, onClick }) => 
             <View key={index} className={styles.photoItem}>
               <Image
                 className={styles.photoImage}
-                src={photo}
+                src={getPhotoPath(photo)}
                 mode="aspectFill"
                 lazyLoad
               />

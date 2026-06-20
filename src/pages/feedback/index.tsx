@@ -8,6 +8,7 @@ import styles from './index.module.scss';
 import { useVehicleStore } from '@/store/vehicleStore';
 import { mockAlerts } from '@/data/mockData';
 import { REASON_MAP } from '@/types';
+import { saveAllPhotos, getPhotoPath } from '@/utils/photo';
 import type { AlertRecord, FeedbackReason } from '@/types';
 
 const MAX_PHOTOS = 6;
@@ -49,6 +50,8 @@ const FeedbackPage: React.FC = () => {
     console.log('[FeedbackPage] 选择原因:', reason);
   };
 
+  const [savingPhotos, setSavingPhotos] = useState(false);
+
   const handleChooseImage = () => {
     if (photos.length >= MAX_PHOTOS) {
       Taro.showToast({ title: `最多上传${MAX_PHOTOS}张照片`, icon: 'none' });
@@ -57,25 +60,39 @@ const FeedbackPage: React.FC = () => {
 
     Taro.showActionSheet({
       itemList: ['拍照', '从相册选择'],
-      success: (res) => {
+      success: async (res) => {
         const sourceType = res.tapIndex === 0 ? ['camera'] : ['album'];
         
-        Taro.chooseImage({
-          count: MAX_PHOTOS - photos.length,
-          sourceType: sourceType as any,
-          sizeType: ['compressed'],
-          success: (res) => {
-            const newPhotos = res.tempFilePaths;
-            setPhotos(prev => [...prev, ...newPhotos]);
-            console.log('[FeedbackPage] 选择照片:', newPhotos.length, '张');
-          },
-          fail: (err) => {
-            console.error('[FeedbackPage] 选择照片失败', err);
-            if (err.errMsg && !err.errMsg.includes('cancel')) {
-              Taro.showToast({ title: '选择照片失败', icon: 'none' });
-            }
+        try {
+          const res = await Taro.chooseImage({
+            count: MAX_PHOTOS - photos.length,
+            sourceType: sourceType as any,
+            sizeType: ['compressed']
+          });
+
+          const tempPaths = res.tempFilePaths;
+          console.log('[FeedbackPage] 选择照片:', tempPaths.length, '张，开始保存到持久化路径');
+          
+          setSavingPhotos(true);
+          Taro.showLoading({ title: '保存照片中...', mask: true });
+          
+          const savedPaths = await saveAllPhotos(tempPaths);
+          
+          setPhotos(prev => [...prev, ...savedPaths]);
+          
+          Taro.hideLoading();
+          setSavingPhotos(false);
+          
+          console.log('[FeedbackPage] 照片保存完成，持久化路径:', savedPaths);
+          Taro.showToast({ title: `已添加${savedPaths.length}张照片`, icon: 'success' });
+        } catch (err) {
+          console.error('[FeedbackPage] 选择照片失败', err);
+          Taro.hideLoading();
+          setSavingPhotos(false);
+          if (err.errMsg && !err.errMsg.includes('cancel')) {
+            Taro.showToast({ title: '选择照片失败', icon: 'none' });
           }
-        });
+        }
       }
     });
   };
@@ -94,9 +111,11 @@ const FeedbackPage: React.FC = () => {
   };
 
   const handlePreviewImage = (url: string) => {
+    const permanentUrl = getPhotoPath(url);
+    const permanentUrls = photos.map(p => getPhotoPath(p));
     Taro.previewImage({
-      current: url,
-      urls: photos
+      current: permanentUrl,
+      urls: permanentUrls
     });
   };
 
@@ -241,7 +260,7 @@ const FeedbackPage: React.FC = () => {
               </View>
               <Image
                 className={styles.photoImage}
-                src={photo}
+                src={getPhotoPath(photo)}
                 mode="aspectFill"
                 onClick={() => handlePreviewImage(photo)}
                 lazyLoad

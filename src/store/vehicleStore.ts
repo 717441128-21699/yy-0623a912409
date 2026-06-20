@@ -187,6 +187,7 @@ export const useVehicleStore = create<VehicleState>((set, get) => ({
 
     const prevTemp = monitorStatus?.currentTemperature ?? status.currentTemperature;
     const tempRise = status.currentTemperature - prevTemp;
+    const tempFromTarget = status.currentTemperature - status.targetTemperature;
 
     if (status.powerStatus === 'danger' || status.voltage < 20) {
       console.log('[VehicleStore] 检测到主电断开，自动触发告警');
@@ -200,11 +201,12 @@ export const useVehicleStore = create<VehicleState>((set, get) => ({
       return;
     }
 
-    if (tempRise > 2 || status.currentTemperature > status.targetTemperature + 5) {
+    if (tempRise > 1 || tempFromTarget > 3) {
       console.log('[VehicleStore] 检测到温度明显回升，自动触发告警', {
         current: status.currentTemperature,
         target: status.targetTemperature,
-        rise: tempRise
+        rise: tempRise,
+        fromTarget: tempFromTarget
       });
       get().triggerAlert('temperature_rise', status.currentTemperature);
       return;
