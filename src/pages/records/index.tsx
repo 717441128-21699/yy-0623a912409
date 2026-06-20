@@ -11,12 +11,11 @@ import type { AlertRecord } from '@/types';
 type FilterType = 'all' | 'handled' | 'pending';
 
 const RecordsPage: React.FC = () => {
-  const { alerts, feedbackRecords } = useVehicleStore();
+  const { alerts, feedbackRecords, getFeedbackByAlertId, isInitialized } = useVehicleStore();
   const [filter, setFilter] = useState<FilterType>('all');
 
   const allAlerts = useMemo(() => {
-    const storeAlerts = alerts.length > 0 ? alerts : mockAlerts;
-    const allRecords = [...storeAlerts];
+    const allRecords = [...alerts];
     
     mockAlerts.forEach(mockAlert => {
       const exists = allRecords.find(a => a.id === mockAlert.id);
@@ -31,8 +30,16 @@ const RecordsPage: React.FC = () => {
   }, [alerts]);
 
   const allFeedbacks = useMemo(() => {
-    const storeFeedbacks = feedbackRecords.length > 0 ? feedbackRecords : mockFeedbacks;
-    return storeFeedbacks;
+    const allRecords = [...feedbackRecords];
+    
+    mockFeedbacks.forEach(mockFeedback => {
+      const exists = allRecords.find(f => f.alertId === mockFeedback.alertId);
+      if (!exists) {
+        allRecords.push(mockFeedback);
+      }
+    });
+    
+    return allRecords;
   }, [feedbackRecords]);
 
   const filteredAlerts = useMemo(() => {
@@ -53,6 +60,8 @@ const RecordsPage: React.FC = () => {
   }), [allAlerts]);
 
   const getFeedback = (alertId: string) => {
+    const storeFeedback = getFeedbackByAlertId(alertId);
+    if (storeFeedback) return storeFeedback;
     return allFeedbacks.find(f => f.alertId === alertId);
   };
 

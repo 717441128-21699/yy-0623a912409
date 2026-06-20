@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text, Button, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useDidShow, usePullDownRefresh } from '@tarojs/taro';
@@ -11,21 +11,35 @@ import { mockAlerts } from '@/data/mockData';
 import type { AlertRecord, MonitorStatus } from '@/types';
 
 const MonitorPage: React.FC = () => {
-  const { isBound, vehicleInfo, monitorStatus, alerts, currentAlert, simulateAlert, updateMonitorStatus, clearCurrentAlert } = useVehicleStore();
+  const {
+    isBound,
+    vehicleInfo,
+    monitorStatus,
+    alerts,
+    currentAlert,
+    simulateAlert,
+    updateMonitorStatus,
+    clearCurrentAlert,
+    isInitialized
+  } = useVehicleStore();
+
   const [displayAlerts, setDisplayAlerts] = useState<AlertRecord[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const alertTriggeredRef = useRef<Set<string>>(new Set());
+  const simulationCounterRef = useRef(0);
 
   useEffect(() => {
     if (alerts.length > 0) {
       setDisplayAlerts(alerts.slice(0, 10));
-    } else if (isBound) {
+    } else if (isBound && isInitialized) {
       setDisplayAlerts(mockAlerts.slice(0, 5));
     }
-  }, [alerts, isBound]);
+  }, [alerts, isBound, isInitialized]);
 
   useEffect(() => {
-    if (currentAlert) {
-      console.log('[MonitorPage] 检测到新告警', currentAlert.title);
+    if (currentAlert && !alertTriggeredRef.current.has(currentAlert.id)) {
+      alertTriggeredRef.current.add(currentAlert.id);
+      console.log('[MonitorPage] 检测到新告警', currentAlert.title, currentAlert.id);
       triggerFullAlert(currentAlert.title, currentAlert.description);
     }
   }, [currentAlert]);
@@ -34,22 +48,77 @@ const MonitorPage: React.FC = () => {
     if (!isBound || !monitorStatus) return;
 
     const interval = setInterval(() => {
-      const newTemp = monitorStatus.currentTemperature + (Math.random() - 0.5) * 0.5;
-      const newStatus: MonitorStatus = {
+      simulationCounterRef.current++;
+      
+      let newStatus: MonitorStatus = {
         ...monitorStatus,
-        currentTemperature: Math.round(newTemp * 10) / 10,
-        voltage: 24 + Math.random() * 1.5,
         lastReportTime: new Date().toISOString()
       };
+
+      const hasPendingAlert = currentAlert && currentAlert.status === 'pending';
+
+      if (!hasPendingAlert && simulationCounterRef.current % 6 === 0) {
+        const anomalyType = Math.floor(Math.random() * 4);
+        
+        switch (anomalyType) {
+          case 0:
+            console.log('[MonitorPage] 模拟主电断开异常');
+            newStatus = {
+              ...newStatus,
+              powerStatus: 'danger',
+              powerStatusText: '供电异常',
+              voltage: 18.5
+            };
+            break;
+          case 1:
+            console.log('[MonitorPage] 模拟冷机停机异常');
+            newStatus = {
+              ...newStatus,
+              compressorStatus: 'stopped'
+            };
+            break;
+          case 2:
+            console.log('[MonitorPage] 模拟温度回升异常');
+            const tempRise = Math.random() * 5 + 2;
+            newStatus = {
+              ...newStatus,
+              currentTemperature: Math.round((monitorStatus.currentTemperature + tempRise) * 10) / 10
+            };
+            break;
+          default:
+            console.log('[MonitorPage] 模拟正常波动');
+            const normalTemp = monitorStatus.currentTemperature + (Math.random() - 0.5) * 0.8;
+            newStatus = {
+              ...newStatus,
+              currentTemperature: Math.round(normalTemp * 10) / 10,
+              voltage: 24 + Math.random() * 1.5,
+              compressorStatus: 'running'
+            };
+        }
+      } else if (hasPendingAlert) {
+        console.log('[MonitorPage] 有待处理告警，保持当前状态');
+      } else {
+        const normalTemp = monitorStatus.currentTemperature + (Math.random() - 0.5) * 0.5;
+        newStatus = {
+          ...newStatus,
+          currentTemperature: Math.round(normalTemp * 10) / 10,
+          voltage: 24 + Math.random() * 1.5,
+          powerStatus: 'normal',
+          powerStatusText: '供电正常',
+          compressorStatus: 'running'
+        };
+      }
+
       updateMonitorStatus(newStatus);
-    }, 10000);
+    }, 8000);
 
     return () => clearInterval(interval);
-  }, [isBound, monitorStatus, updateMonitorStatus]);
+  }, [isBound, monitorStatus, updateMonitorStatus, currentAlert]);
 
   useDidShow(() => {
     console.log('[MonitorPage] 页面显示');
-    if (currentAlert) {
+    if (currentAlert && !alertTriggeredRef.current.has(currentAlert.id)) {
+      alertTriggeredRef.current.add(currentAlert.id);
       triggerFullAlert(currentAlert.title, currentAlert.description);
     }
   });
@@ -115,6 +184,16 @@ const MonitorPage: React.FC = () => {
       });
     }
   };
+
+  if (!isInitialized) {
+    return (
+      <ScrollView className={styles.page} scrollY>
+        <View style={{ textAlign: 'center', padding: '200rpx 0' }}>
+          <Text style={{ color: '#78909C', fontSize: '30rpx' }}>加载中...</Text>
+        </View>
+      </ScrollView>
+    );
+  }
 
   if (!isBound) {
     return (

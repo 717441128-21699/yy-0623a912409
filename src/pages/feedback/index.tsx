@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, Button, Input, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useRouter } from '@tarojs/taro';
@@ -16,28 +16,33 @@ const FeedbackPage: React.FC = () => {
   const router = useRouter();
   const alertId = router.params.id;
 
-  const { alerts, submitFeedback } = useVehicleStore();
-  const [alert, setAlert] = useState<AlertRecord | null>(null);
+  const getAlertById = useVehicleStore(state => state.getAlertById);
+  const alerts = useVehicleStore(state => state.alerts);
+  const submitFeedback = useVehicleStore(state => state.submitFeedback);
+
   const [selectedReason, setSelectedReason] = useState<FeedbackReason | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [remark, setRemark] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const alert = useMemo((): AlertRecord | null => {
+    let found = getAlertById(alertId);
+    if (!found) {
+      found = alerts.find(a => a.id === alertId);
+    }
+    if (!found) {
+      found = mockAlerts.find(a => a.id === alertId);
+    }
+    return found || null;
+  }, [alertId, getAlertById, alerts]);
+
   useEffect(() => {
     console.log('[FeedbackPage] 页面加载，告警ID:', alertId);
-
-    let foundAlert = alerts.find(a => a.id === alertId);
-    if (!foundAlert) {
-      foundAlert = mockAlerts.find(a => a.id === alertId);
-    }
-
-    if (foundAlert) {
-      setAlert(foundAlert);
-    } else {
+    if (!alert) {
       Taro.showToast({ title: '告警不存在', icon: 'none' });
       setTimeout(() => Taro.navigateBack(), 1500);
     }
-  }, [alertId, alerts]);
+  }, [alertId, alert]);
 
   const handleReasonSelect = (reason: FeedbackReason) => {
     setSelectedReason(reason);
@@ -134,7 +139,7 @@ const FeedbackPage: React.FC = () => {
     });
 
     setTimeout(() => {
-      submitFeedback(alert.id, {
+      const feedbackRecord = submitFeedback(alert.id, {
         reason: selectedReason,
         reasonText: REASON_MAP[selectedReason],
         photos,
@@ -143,15 +148,19 @@ const FeedbackPage: React.FC = () => {
 
       setSubmitting(false);
       
+      console.log('[FeedbackPage] 回填提交成功，跳转到告警详情', alert.id);
+      
       Taro.showToast({
         title: '提交成功',
         icon: 'success',
-        duration: 2000
+        duration: 1500
       });
 
       setTimeout(() => {
-        Taro.navigateBack({ delta: 2 });
-      }, 2000);
+        Taro.redirectTo({
+          url: `/pages/alert-detail/index?id=${alert.id}`
+        });
+      }, 1500);
     }, 1000);
   };
 

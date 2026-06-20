@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { View, Text, Button, Image, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
-import { useRouter } from '@tarojs/taro';
+import { useRouter, useDidShow } from '@tarojs/taro';
 import classnames from 'classnames';
 import dayjs from 'dayjs';
 import styles from './index.module.scss';
@@ -14,30 +14,43 @@ const AlertDetailPage: React.FC = () => {
   const router = useRouter();
   const alertId = router.params.id;
   
-  const { alerts, feedbackRecords, submitFeedback } = useVehicleStore();
-  const [alert, setAlert] = useState<AlertRecord | null>(null);
-  const [feedback, setFeedback] = useState<FeedbackRecord | null>(null);
+  const getAlertById = useVehicleStore(state => state.getAlertById);
+  const getFeedbackByAlertId = useVehicleStore(state => state.getFeedbackByAlertId);
+  const alerts = useVehicleStore(state => state.alerts);
+  const feedbackRecords = useVehicleStore(state => state.feedbackRecords);
+
+  const alert = useMemo((): AlertRecord | null => {
+    let found = getAlertById(alertId);
+    if (!found) {
+      found = alerts.find(a => a.id === alertId);
+    }
+    if (!found) {
+      found = mockAlerts.find(a => a.id === alertId);
+    }
+    return found || null;
+  }, [alertId, getAlertById, alerts]);
+
+  const feedback = useMemo((): FeedbackRecord | null => {
+    let found = getFeedbackByAlertId(alertId);
+    if (!found) {
+      found = feedbackRecords.find(f => f.alertId === alertId);
+    }
+    if (!found) {
+      found = mockFeedbacks.find(f => f.alertId === alertId);
+    }
+    return found || null;
+  }, [alertId, getFeedbackByAlertId, feedbackRecords]);
 
   useEffect(() => {
     console.log('[AlertDetailPage] 页面加载，告警ID:', alertId);
-    
-    let foundAlert = alerts.find(a => a.id === alertId);
-    if (!foundAlert) {
-      foundAlert = mockAlerts.find(a => a.id === alertId);
-    }
-    
-    if (foundAlert) {
-      setAlert(foundAlert);
-      
-      let foundFeedback = feedbackRecords.find(f => f.alertId === alertId);
-      if (!foundFeedback) {
-        foundFeedback = mockFeedbacks.find(f => f.alertId === alertId);
-      }
-      setFeedback(foundFeedback || null);
-    } else {
+    if (!alert) {
       Taro.showToast({ title: '告警不存在', icon: 'none' });
     }
-  }, [alertId, alerts, feedbackRecords]);
+  }, [alertId, alert]);
+
+  useDidShow(() => {
+    console.log('[AlertDetailPage] 页面显示，刷新数据');
+  });
 
   const handleCallDispatch = () => {
     console.log('[AlertDetailPage] 拨打调度电话');
@@ -64,14 +77,10 @@ const AlertDetailPage: React.FC = () => {
     });
   };
 
-  const alertTypeBadgeClass = classnames(styles.alertTypeBadge, {
-    [styles.alertTypeHandled]: alert?.status === 'handled'
-  });
-
-  const statusIconClass = classnames(styles.statusIcon, {
-    [styles.statusPending]: alert?.status === 'pending',
-    [styles.statusHandled]: alert?.status === 'handled'
-  });
+  const handleBackToRecords = () => {
+    console.log('[AlertDetailPage] 返回到处置记录');
+    Taro.switchTab({ url: '/pages/records/index' });
+  };
 
   if (!alert) {
     return (
@@ -83,8 +92,34 @@ const AlertDetailPage: React.FC = () => {
     );
   }
 
+  const alertTypeBadgeClass = classnames(styles.alertTypeBadge, {
+    [styles.alertTypeHandled]: alert?.status === 'handled'
+  });
+
+  const statusIconClass = classnames(styles.statusIcon, {
+    [styles.statusPending]: alert?.status === 'pending',
+    [styles.statusHandled]: alert?.status === 'handled'
+  });
+
+  const showSuccessBanner = feedback && alert.status === 'handled';
+
   return (
     <ScrollView className={styles.page} scrollY>
+      {showSuccessBanner && (
+        <View style={{
+          background: 'rgba(67, 160, 71, 0.1)',
+          border: '2rpx solid #43A047',
+          borderRadius: '16rpx',
+          padding: '24rpx',
+          marginBottom: '24rpx',
+          textAlign: 'center'
+        }}>
+          <Text style={{ color: '#43A047', fontSize: '30rpx', fontWeight: 600 }}>
+            ✓ 处置回填已提交成功
+          </Text>
+        </View>
+      )}
+
       <View className={styles.alertHeader}>
         <View className={alertTypeBadgeClass}>
           <Text>{alert.status === 'pending' ? '待处理' : '已处理'}</Text>
@@ -205,6 +240,18 @@ const AlertDetailPage: React.FC = () => {
         <View className={styles.bottomBar}>
           <Button className={styles.primaryBtn} onClick={handleGoFeedback}>
             我已处理，填写回填
+          </Button>
+        </View>
+      )}
+
+      {alert.status === 'handled' && (
+        <View className={styles.bottomBar}>
+          <Button 
+            className={styles.primaryBtn} 
+            onClick={handleBackToRecords}
+            style={{ background: '#1E88E5' }}
+          >
+            查看全部记录
           </Button>
         </View>
       )}
