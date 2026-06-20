@@ -1,0 +1,190 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding: $page-spacing $page-padding 200rpx;
+}
+
+.vehicleInfoBar {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg $spacing-xl;
+  margin-bottom: $spacing-lg;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: $shadow-card;
+}
+
+.vehiclePlate {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.vehicleCargo {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xxl * 2 0;
+}
+
+.emptyIcon {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: $radius-round;
+  background: rgba(30, 136, 229, 0.1);
+  @include flex-center;
+  margin-bottom: $spacing-xl;
+}
+
+.emptyIconText {
+  font-size: 80rpx;
+  color: $color-primary;
+}
+
+.emptyTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.emptyDesc {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  text-align: center;
+  margin-bottom: $spacing-xl;
+  padding: 0 $spacing-xxl;
+}
+
+.emptyBtn {
+  @include button-reset;
+  padding: 0 $spacing-xxl;
+  height: $button-height-lg;
+  background: $color-primary;
+  border-radius: $radius-button;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+  transition: all $transition-base;
+
+  &:active {
+    background: $color-primary-dark;
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: $spacing-xl 0 $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.sectionCount {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
+
+.actionRow {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.actionBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-md;
+  border-radius: $radius-button;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.testBtn {
+  background: $color-error;
+  color: $color-text-white;
+}
+
+.refreshBtn {
+  background: $color-bg-card-light;
+  color: $color-text-primary;
+}
+
+.alertList {
+  margin-top: $spacing-md;
+}
+
+.emptyAlert {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xxl;
+  text-align: center;
+  box-shadow: $shadow-card;
+}
+
+.emptyAlertText {
+  font-size: $font-size-lg;
+  color: $color-text-tertiary;
+}
+
+.pendingAlertBanner {
+  background: linear-gradient(90deg, rgba(229, 57, 53, 0.2) 0%, rgba(229, 57, 53, 0.05) 100%);
+  border: 2rpx solid $color-status-danger;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  animation: $alert-pulse;
+}
+
+.bannerTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-status-danger;
+  margin-bottom: $spacing-xs;
+}
+
+.bannerDesc {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-md;
+}
+
+.bannerBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-md;
+  background: $color-error;
+  border-radius: $radius-button;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}

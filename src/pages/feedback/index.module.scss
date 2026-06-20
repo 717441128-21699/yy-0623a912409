@@ -1,0 +1,250 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding: $page-spacing $page-padding 200rpx;
+}
+
+.alertInfoCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg $spacing-xl;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+  border-left: 6rpx solid $color-primary;
+}
+
+.alertInfoTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.alertInfoDesc {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-md;
+}
+
+.alertInfoMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.section {
+  margin-bottom: $spacing-xl;
+}
+
+.sectionTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+}
+
+.required {
+  color: $color-error;
+  margin-left: $spacing-xs;
+}
+
+.reasonList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.reasonItem {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  border: 3rpx solid $color-border;
+  transition: all $transition-base;
+  display: flex;
+  align-items: center;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.reasonActive {
+  border-color: $color-primary;
+  background: rgba(30, 136, 229, 0.05);
+}
+
+.reasonRadio {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: $radius-round;
+  border: 3rpx solid $color-border;
+  margin-right: $spacing-lg;
+  flex-shrink: 0;
+  @include flex-center;
+  transition: all $transition-base;
+}
+
+.reasonRadioActive {
+  border-color: $color-primary;
+  background: $color-primary;
+}
+
+.reasonRadioInner {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: $radius-round;
+  background: $color-text-white;
+}
+
+.reasonContent {
+  flex: 1;
+}
+
+.reasonTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.photoSection {
+  margin-bottom: $spacing-xl;
+}
+
+.photoGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+}
+
+.photoItem {
+  width: 210rpx;
+  height: 210rpx;
+  border-radius: $radius-md;
+  overflow: hidden;
+  position: relative;
+  background: $color-bg-card;
+}
+
+.photoImage {
+  width: 100%;
+  height: 100%;
+}
+
+.photoDelete {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: $radius-round;
+  background: rgba(0, 0, 0, 0.6);
+  @include flex-center;
+  z-index: 10;
+}
+
+.photoDeleteText {
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  line-height: 1;
+}
+
+.photoAdd {
+  width: 210rpx;
+  height: 210rpx;
+  border-radius: $radius-md;
+  border: 3rpx dashed $color-border;
+  background: $color-bg-card;
+  @include flex-center;
+  flex-direction: column;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.photoAddIcon {
+  font-size: 64rpx;
+  color: $color-text-tertiary;
+  line-height: 1;
+  margin-bottom: $spacing-xs;
+}
+
+.photoAddText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.photoTip {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-top: $spacing-md;
+}
+
+.remarkSection {
+  margin-bottom: $spacing-xl;
+}
+
+.remarkInput {
+  width: 100%;
+  min-height: 200rpx;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  border: 2rpx solid $color-border;
+  box-sizing: border-box;
+  line-height: $line-height-loose;
+  transition: all $transition-base;
+
+  &:focus {
+    border-color: $color-primary;
+  }
+}
+
+.remarkCount {
+  text-align: right;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-top: $spacing-sm;
+}
+
+.bottomBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: $spacing-lg $page-padding calc($spacing-lg + env(safe-area-inset-bottom));
+  background: $color-bg-card;
+  box-shadow: $shadow-float;
+}
+
+.submitBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: $color-primary;
+  border-radius: $radius-button;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+  transition: all $transition-base;
+
+  &:active {
+    background: $color-primary-dark;
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    background: $color-text-disabled;
+  }
+}

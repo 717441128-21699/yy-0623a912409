@@ -1,0 +1,131 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding: $page-spacing $page-padding 200rpx;
+}
+
+.statsCard {
+  background: $color-bg-card;
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-md;
+}
+
+.statsItem {
+  text-align: center;
+  padding: $spacing-md 0;
+  background: $color-bg-card-light;
+  border-radius: $radius-lg;
+}
+
+.statsValue {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.statsValueDanger {
+  color: $color-status-danger;
+}
+
+.statsValueSuccess {
+  color: $color-status-normal;
+}
+
+.statsLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.filterBar {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+  background: $color-bg-card;
+  padding: $spacing-sm;
+  border-radius: $radius-button;
+}
+
+.filterItem {
+  flex: 1;
+  height: $button-height-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.filterActive {
+  background: $color-primary;
+  color: $color-text-white;
+}
+
+.filterInactive {
+  background: transparent;
+  color: $color-text-secondary;
+}
+
+.recordList {
+  margin-top: $spacing-md;
+}
+
+.emptyState {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xxl * 2 $spacing-xl;
+  text-align: center;
+  box-shadow: $shadow-card;
+}
+
+.emptyIcon {
+  font-size: 80rpx;
+  margin-bottom: $spacing-lg;
+}
+
+.emptyText {
+  font-size: $font-size-lg;
+  color: $color-text-tertiary;
+  line-height: $line-height-loose;
+}
+
+.emptySubtext {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+  margin-top: $spacing-sm;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: $spacing-xl 0 $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.sectionCount {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
